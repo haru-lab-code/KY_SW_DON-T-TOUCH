@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>수상한 돈 딱 걸렸어</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#F0F4FF;--white:#fff;
+  --safe:#00C48C;--warn:#FFB400;--danger:#FF3B30;
+  --text:#111827;--sub:#6B7280;--muted:#9CA3AF;--border:#E5E7EB;
+  --blue:#2563EB;--blue-bg:#EFF6FF;
+  --radius:20px;--radius-sm:12px;
+  --shadow:0 2px 16px rgba(0,0,0,.07);--shadow-lg:0 8px 40px rgba(0,0,0,.12);
+}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── 헤더 ── */
+.header{background:linear-gradient(135deg,#1E40AF,#2563EB);padding:22px 20px 18px;text-align:center;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.08) 0%,transparent 60%);}
+.header-icon{font-size:44px;margin-bottom:8px;display:block;}
+.header-title{font-size:24px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:4px;}
+.header-sub{font-size:13px;color:rgba(255,255,255,.75);}
+
+/* ── 피드백 카운터 바 (ML 상태 바 대체) ── */
+.fb-bar{background:var(--white);border-bottom:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;gap:8px;font-size:12px;position:sticky;top:0;z-index:100;}
+.fb-bar-left{flex:1;display:flex;align-items:center;gap:7px;color:var(--sub);}
+.fb-bar-left strong{color:var(--text);}
+.fb-count{font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;background:#EEF2FF;color:#4F46E5;}
+.fb-dl-btn{padding:5px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--sub);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;}
+.fb-dl-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ── 메인 ── */
+.main{max-width:600px;margin:0 auto;padding:18px 16px 100px;}
+
+/* ── 입력 카드 ── */
+.input-card{background:var(--white);border-radius:var(--radius);padding:20px;margin-bottom:12px;box-shadow:var(--shadow-lg);}
+.input-label{font-size:15px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.msg-textarea{width:100%;min-height:140px;background:#F8FAFF;border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-size:16px;font-family:inherit;color:var(--text);resize:none;outline:none;line-height:1.7;transition:all .2s;}
+.msg-textarea:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+.msg-textarea::placeholder{color:#C4C9D4;font-size:14px;}
+.example-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.ex-btn{padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);color:var(--sub);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;}
+.ex-btn:active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);}
+
+/* ── 검사 버튼 ── */
+.check-btn{width:100%;padding:17px;border-radius:16px;border:none;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;font-size:17px;font-weight:900;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(37,99,235,.35);transition:all .15s;margin-bottom:12px;}
+.check-btn:active{transform:scale(.98);}
+.check-btn:disabled{background:linear-gradient(135deg,#93C5FD,#BFDBFE);box-shadow:none;cursor:not-allowed;}
+
+/* ── 로딩 ── */
+.loading-wrap{display:none;background:var(--white);border-radius:var(--radius);padding:28px 20px;text-align:center;box-shadow:var(--shadow);margin-bottom:12px;}
+.loading-wrap.show{display:block;animation:fadeUp .3s ease;}
+.loading-ring{width:44px;height:44px;border:4px solid #E5E7EB;border-top-color:var(--blue);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:15px;font-weight:700;margin-bottom:4px;}
+.loading-sub{font-size:12px;color:var(--sub);}
+
+/* ── 결과 카드 ── */
+.result-card{display:none;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);margin-bottom:12px;}
+.result-card.show{display:block;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{opacity:0;transform:scale(.94) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.result-hero{padding:28px 22px 22px;text-align:center;}
+.result-emoji{font-size:64px;line-height:1;display:block;margin-bottom:10px;}
+.result-level{font-size:28px;font-weight:900;margin-bottom:7px;letter-spacing:-.4px;}
+.result-summary{font-size:14px;line-height:1.7;font-weight:500;}
+.score-row{display:flex;align-items:center;gap:10px;margin:14px 22px 0;}
+.score-track{flex:1;height:9px;border-radius:5px;background:rgba(0,0,0,.1);overflow:hidden;}
+.score-fill{height:100%;border-radius:5px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1);}
+.score-num{font-size:13px;font-weight:800;opacity:.8;white-space:nowrap;}
+
+.result-body{padding:18px 22px 22px;}
+.act-title{font-size:13px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.act-list{display:flex;flex-direction:column;gap:8px;}
+.act-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.6;font-weight:600;}
+.act-num{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;flex-shrink:0;margin-top:1px;}
+.kw-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;}
+.kw{padding:3px 9px;border-radius:16px;font-size:11px;font-weight:700;}
+
+/* 레벨별 */
+.lv-safe .result-hero{background:linear-gradient(150deg,#ECFDF5,#D1FAE5);}
+.lv-safe .result-body{background:#F0FDF4;}
+.lv-safe .result-level{color:#059669;}
+.lv-safe .result-summary{color:#065F46;}
+.lv-safe .score-fill{background:linear-gradient(90deg,#34D399,#10B981);}
+.lv-safe .act-item{background:rgba(255,255,255,.75);color:#064E3B;}
+.lv-safe .act-num{background:rgba(5,150,105,.15);color:#059669;}
+.lv-safe .kw{background:#D1FAE5;color:#065F46;}
+.lv-warn .result-hero{background:linear-gradient(150deg,#FFFBEB,#FEF3C7);}
+.lv-warn .result-body{background:#FEFCE8;}
+.lv-warn .result-level{color:#D97706;}
+.lv-warn .result-summary{color:#92400E;}
+.lv-warn .score-fill{background:linear-gradient(90deg,#FCD34D,#F59E0B);}
+.lv-warn .act-item{background:rgba(255,255,255,.75);color:#78350F;}
+.lv-warn .act-num{background:rgba(217,119,6,.15);color:#D97706;}
+.lv-warn .kw{background:#FEF3C7;color:#92400E;}
+.lv-danger .result-hero{background:linear-gradient(150deg,#FFF1F2,#FFE4E6);}
+.lv-danger .result-body{background:#FFF5F5;}
+.lv-danger .result-level{color:#DC2626;}
+.lv-danger .result-summary{color:#7F1D1D;}
+.lv-danger .score-fill{background:linear-gradient(90deg,#F87171,#EF4444);}
+.lv-danger .act-item{background:rgba(255,255,255,.75);color:#7F1D1D;}
+.lv-danger .act-num{background:rgba(220,38,38,.12);color:#DC2626;}
+.lv-danger .kw{background:#FEE2E2;color:#991B1B;}
+.lv-critical .result-hero{background:linear-gradient(150deg,#1C0606,#2D0000);}
+.lv-critical .result-body{background:#200808;}
+.lv-critical .result-level{color:#FF6B6B;}
+.lv-critical .result-summary{color:#FECACA;}
+.lv-critical .score-fill{background:linear-gradient(90deg,#F87171,#DC2626);}
+.lv-critical .act-item{background:rgba(255,255,255,.05);color:#FCA5A5;}
+.lv-critical .act-num{background:rgba(239,68,68,.2);color:#FF6B6B;}
+.lv-critical .kw{background:rgba(239,68,68,.18);color:#FCA5A5;}
+.lv-critical .act-title{color:#FCA5A5;}
+
+/* ── 피드백 ── */
+.fb-card{display:none;background:var(--white);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px;box-shadow:var(--shadow);border:1.5px solid var(--border);}
+.fb-card.show{display:block;animation:fadeUp .3s ease;}
+.fb-title{font-size:13px;font-weight:700;color:var(--sub);margin-bottom:12px;line-height:1.55;}
+.fb-title strong{color:var(--text);}
+.fb-row{display:flex;gap:8px;}
+.fb-btn{flex:1;padding:14px 10px;border-radius:13px;border:2px solid;font-size:14px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;}
+.fb-btn:active{transform:scale(.97);}
+.fb-btn:disabled{opacity:.5;cursor:not-allowed;}
+.fb-fraud{border-color:#FEE2E2;background:#FFF5F5;color:#DC2626;}
+.fb-safe {border-color:#D1FAE5;background:#F0FDF4;color:#059669;}
+.fb-fraud.sel{background:#DC2626;border-color:#DC2626;color:#fff;}
+.fb-safe.sel {background:#059669;border-color:#059669;color:#fff;}
+.fb-done{display:none;text-align:center;font-size:13px;font-weight:600;color:var(--sub);padding:8px 0 2px;}
+.fb-done.show{display:block;animation:fadeUp .25s ease;}
+
+/* ── 신고 버튼 ── */
+.report-wrap{display:none;flex-direction:column;gap:8px;margin-bottom:12px;}
+.report-wrap.show{display:flex;}
+.rep-btn{width:100%;padding:16px;border-radius:15px;border:none;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:transform .1s;}
+.rep-btn:active{transform:scale(.97);}
+.rep-police{background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;}
+.rep-fss   {background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;}
+
+/* ── 다시하기 ── */
+.reset-btn{display:none;width:100%;padding:14px;border-radius:13px;border:2px solid var(--border);background:var(--white);color:var(--sub);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:12px;transition:all .15s;}
+.reset-btn.show{display:block;}
+.reset-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-bg);}
+
+/* ── 하단 안내 ── */
+.tip-box{background:var(--white);border-radius:15px;padding:15px 17px;display:flex;gap:9px;font-size:13px;color:var(--sub);line-height:1.6;border:1.5px solid var(--border);}
+
+/* ── 모달 ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;animation:fadeUp .2s ease;}
+.modal-box{background:#fff;border-radius:22px 22px 0 0;padding:30px 22px 34px;width:100%;max-width:480px;text-align:center;}
+.modal-icon{font-size:48px;margin-bottom:10px;}
+.modal-title{font-size:19px;font-weight:900;margin-bottom:7px;}
+.modal-desc{font-size:13px;color:var(--sub);margin-bottom:22px;line-height:1.6;}
+.modal-row{display:flex;gap:8px;}
+.modal-cancel{flex:1;padding:14px;border-radius:12px;border:2px solid var(--border);background:#fff;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--sub);}
+.modal-call{flex:1;padding:14px;border-radius:12px;border:none;font-size:15px;font-weight:900;font-family:inherit;cursor:pointer;color:#fff;}
+
+/* ── 토스트 ── */
+.toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(14px);background:#111827;color:#fff;padding:11px 20px;border-radius:28px;font-size:12px;font-weight:600;opacity:0;transition:all .25s;z-index:2000;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- 헤더 -->
+<div class="header">
+  <span class="header-icon">🛡️</span>
+  <div class="header-title">수상한 돈 딱 걸렸어</div>
+  <div class="header-sub">키워드 · 패턴 · URL 3중 탐지 시스템</div>
+</div>
+
+<!-- 피드백 카운터 바 -->
+<div class="fb-bar">
+  <div class="fb-bar-left">
+    🧠 누적 피드백 <span class="fb-count" id="fb-count">0건</span>
+    &nbsp;<strong>이 기기에 저장됨</strong>
+  </div>
+  <button class="fb-dl-btn" onclick="downloadFeedback()">⬇ 데이터 다운로드</button>
+</div>
+
+<div class="main">
+
+  <!-- 입력 카드 -->
+  <div class="input-card">
+    <div class="input-label">📋 수상한 문자 붙여넣기</div>
+    <textarea class="msg-textarea" id="msg-input"
+      placeholder="여기에 수상한 문자 내용을 붙여넣으세요.
+
+예) [금융감독원] 고객님 계좌가 불법거래에 연루되었습니다.
+24시간 내 본인확인 요망 → http://..."></textarea>
+    <div class="example-row">
+      <button class="ex-btn" onclick="loadEx(0)">🚨 위험 예시</button>
+      <button class="ex-btn" onclick="loadEx(1)">⚠️ 주의 예시</button>
+      <button class="ex-btn" onclick="loadEx(2)">✅ 정상 예시</button>
+      <button class="ex-btn" onclick="doReset()">🗑️ 지우기</button>
+    </div>
+  </div>
+
+  <!-- 검사 버튼 -->
+  <button class="check-btn" id="check-btn" onclick="doCheck()">🔍 &nbsp; 지금 바로 검사하기</button>
+
+  <!-- 로딩 -->
+  <div class="loading-wrap" id="loading">
+    <div class="loading-ring"></div>
+    <div class="loading-msg">키워드 · 패턴 · URL 분석 중...</div>
+    <div class="loading-sub">위험 요소를 확인하고 있어요</div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="result-card" id="result-card">
+    <div class="result-hero">
+      <span class="result-emoji"  id="r-emoji"></span>
+      <div class="result-level"   id="r-level"></div>
+      <div class="result-summary" id="r-summary"></div>
+      <div class="score-row">
+        <div class="score-track"><div class="score-fill" id="r-bar" style="width:0%"></div></div>
+        <div class="score-num" id="r-score"></div>
+      </div>
+    </div>
+    <div class="result-body">
+      <div class="act-title">📌 이렇게 하세요</div>
+      <div class="act-list" id="r-actions"></div>
+      <div class="kw-row"   id="r-kws"></div>
+    </div>
+  </div>
+
+  <!-- 피드백 -->
+  <div class="fb-card" id="fb-card">
+    <div class="fb-title">🙋 <strong>이 판정이 맞나요?</strong><br>피드백은 이 기기에 저장되며, 다운로드해서 AI 학습에 활용할 수 있어요</div>
+    <div class="fb-row">
+      <button class="fb-btn fb-fraud" id="fb-fraud" onclick="sendFeedback('fraud')">🚨 사기 맞아요</button>
+      <button class="fb-btn fb-safe"  id="fb-safe"  onclick="sendFeedback('safe')">✅ 정상이에요</button>
+    </div>
+    <div class="fb-done" id="fb-done"></div>
+  </div>
+
+  <!-- 신고 버튼 -->
+  <div class="report-wrap" id="report-wrap">
+    <button class="rep-btn rep-police" onclick="openModal('112','경찰청')">👮 경찰청 112 &nbsp;신고하기</button>
+    <button class="rep-btn rep-fss"    onclick="openModal('1332','금융감독원')">🏛️ 금융감독원 1332 &nbsp;신고하기</button>
+  </div>
+
+  <!-- 다시하기 -->
+  <button class="reset-btn" id="reset-btn" onclick="doReset()">🔄 &nbsp; 다른 문자 검사하기</button>
+
+  <!-- 하단 안내 -->
+  <div class="tip-box">
+    <span style="font-size:19px;flex-shrink:0">💡</span>
+    <div><strong style="color:var(--text)">알아두세요</strong><br>링크는 절대 누르지 마세요. 피드백을 누르면 이 기기에 데이터가 쌓여요. 상단 <strong style="color:var(--text)">데이터 다운로드</strong>로 JSON을 받아 ML 학습에 활용할 수 있어요.</div>
+  </div>
+
+</div>
+
+<!-- 전화 모달 -->
+<div class="modal-bg" id="call-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-icon"  id="m-icon"></div>
+    <div class="modal-title" id="m-title"></div>
+    <div class="modal-desc"  id="m-desc"></div>
+    <div class="modal-row">
+      <button class="modal-cancel" onclick="closeModal()">취소</button>
+      <button class="modal-call" id="m-call-btn" onclick="doCall()">📞 전화 연결</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   localStorage — 피드백 저장 키
+══════════════════════════════════════════════════════ */
+const LS_KEY = 'fraud_feedbacks_v1';
+
+function loadFeedbacks() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; }
+}
+function saveFeedbacks(list) {
+  localStorage.setItem(LS_KEY, JSON.stringify(list));
+}
+function refreshCount() {
+  document.getElementById('fb-count').textContent = loadFeedbacks().length + '건';
+}
+refreshCount();
+
+/* ══════════════════════════════════════════════════════
+   피드백 JSON 다운로드
+   → ML 학습 서버에 feedbacks.json 으로 올려서 재학습에 사용
+══════════════════════════════════════════════════════ */
+function downloadFeedback() {
+  const list = loadFeedbacks();
+  if (!list.length) { showToast('저장된 피드백이 없어요'); return; }
+  const blob = new Blob([JSON.stringify(list, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'feedbacks_' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(list.length + '건 다운로드 완료!');
+}
+
+/* ══════════════════════════════════════════════════════
+   예시 문자
+══════════════════════════════════════════════════════ */
+const EXAMPLES = [
+  '[긴급] 금융감독원입니다. 고객님 명의 계좌에서 불법 해외송금 5건(총 830만원)이 감지되었습니다. 24시간 내 본인인증을 완료하지 않으면 계좌가 즉시 동결됩니다. 주민번호·카드번호·OTP를 아래 링크에서 입력해 주세요 → http://kbankk-secure.xyz/verify',
+  '[CJ대한통운] 고객님 택배가 주소 불일치로 반송 예정입니다. 48시간 내 재입력 요망 → https://cjlogistics-readdr.info/update',
+  '[국민은행] 고객님의 2월 카드 이용대금 312,000원이 2026.03.25(화) 출금 예정입니다. 잔액 부족 시 미납될 수 있으니 확인 부탁드립니다. 문의: 1588-9999'
+];
+function loadEx(i) { document.getElementById('msg-input').value = EXAMPLES[i]; hideAll(); }
+
+/* ══════════════════════════════════════════════════════
+   룰 엔진 (서버 없이 100% 동작)
+══════════════════════════════════════════════════════ */
+const HI=['계좌','동결','주민번호','카드번호','cvc','cvv','비밀번호','긴급','즉시','금융감독원','검사','경찰','법원','체포','압류','송금','이체','본인확인','인증','링크','개인정보','otp','로그인','신용카드','계좌번호','보안카드','환급','지원금','당첨','설치','업데이트','apk','앱설치'];
+const MD=['택배','배송','반송','주소','오류','재입력','경품','이벤트','수령','미납','연체','독촉','청구','결제'];
+const PHISH=[/\.xyz/i,/\.top/i,/\.info/i,/\.site/i,/\.click/i,/\.loan/i,/\.cc/i,/\.vip/i,/\.tk\b/i,/\.pw\b/i,/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/,/login|verify|secure|confirm|account|auth/i,/-secure/i,/-login/i,/readdr/i,/apk$/i,/bit\.ly|tinyurl/i];
+const SAFE=['samsung.com','naver.com','kakao.com','google.com','apple.com','coupang.com','kbstar.com','nonghyup.com','ibk.co.kr','nhis.or.kr','nts.go.kr'];
+
+function ruleAnalyze(t){
+  let s=0, kws=[];
+  const lo=t.toLowerCase();
+  HI.forEach(k=>{if(lo.includes(k)){s+=12;kws.push(k);}});
+  MD.forEach(k=>{if(lo.includes(k)){s+=5;kws.push(k);}});
+  const urls=t.match(/https?:\/\/[^\s\u3000-\u9fff]+/g)||[];
+  urls.forEach(u=>{
+    const ul=u.toLowerCase();
+    if(SAFE.some(d=>ul.includes(d)))return;
+    PHISH.forEach(p=>{if(p.test(u))s+=14;});
+    if(!u.startsWith('https'))s+=10;
+    if(/\/\/\d{1,3}\.\d{1,3}/.test(u))s+=32;
+    if(/\.apk/i.test(u))s+=44;
+    ['kbank','shinhan','kb-','ibk','nhis','cjlogistic'].forEach(b=>{if(ul.includes(b)&&!SAFE.some(d=>ul.includes(d)))s+=16;});
+  });
+  if(/24시간|48시간|즉시|지금 바로|오늘 안에|기한|만료/.test(t))s+=10;
+  if(/입력.*주세요|알려.*주세요|보내.*주세요/.test(t)&&/번호|정보|비밀번호/.test(t))s+=16;
+  return{score:Math.min(100,s),kws:[...new Set(kws)]};
+}
+
+/* ══════════════════════════════════════════════════════
+   레벨 판정
+══════════════════════════════════════════════════════ */
+function getLevel(s){
+  if(s<20) return{cls:'lv-safe',    emoji:'✅',label:'안전합니다',  summary:'위험 요소가 발견되지 않았습니다.'};
+  if(s<50) return{cls:'lv-warn',    emoji:'⚠️',label:'주의하세요',  summary:'의심스러운 요소가 있어요. 링크는 클릭하지 마세요.'};
+  if(s<75) return{cls:'lv-danger',  emoji:'🚨',label:'위험합니다',  summary:'사기 문자 특성이 다수 발견되었습니다.'};
+  return       {cls:'lv-critical', emoji:'🔴',label:'사기입니다!', summary:'강력한 금융사기 시도입니다. 즉시 차단하세요.'};
+}
+function getActions(s){
+  if(s<20) return['이 문자는 안전해 보입니다.','그래도 모르는 링크는 누르지 마세요.'];
+  if(s<50) return['링크를 클릭하지 마세요','발신자에게 직접 전화로 확인하세요','개인정보는 절대 입력하지 마세요'];
+  if(s<75) return['링크 클릭 절대 금지','개인·금융정보 입력 금지','112 또는 1332에 신고하세요'];
+  return['즉시 전화·연결을 차단하세요','어떤 정보도 제공하지 마세요','경찰 112에 즉시 신고하세요','금융감독원 1332에 신고하세요'];
+}
+
+/* ══════════════════════════════════════════════════════
+   현재 분석 결과 저장 (피드백 시 같이 저장)
+══════════════════════════════════════════════════════ */
+let ctx = {};
+let feedbackSent = false;
+
+/* ══════════════════════════════════════════════════════
+   메인 검사 — async/서버 호출 없음, 룰 엔진 단독
+══════════════════════════════════════════════════════ */
+let busy = false;
+function doCheck(){
+  if(busy) return;
+  const text = document.getElementById('msg-input').value.trim();
+  if(!text){ showToast('문자 내용을 먼저 입력해 주세요'); return; }
+
+  busy = true;
+  feedbackSent = false;
+  const btn = document.getElementById('check-btn');
+  btn.disabled = true;
+  btn.innerHTML = '🔍 &nbsp; 분석 중...';
+  hideAll();
+  document.getElementById('loading').classList.add('show');
+
+  // 600ms 뒤 실행 — 로딩 UI가 먼저 보이도록
+  setTimeout(() => {
+    const result = ruleAnalyze(text);
+    const lv     = getLevel(result.score);
+
+    ctx = {
+      text,
+      rule_score:   result.score,
+      ml_score:     0,
+      final_score:  result.score,
+      system_level: lv.cls.replace('lv-', ''),
+      timestamp:    new Date().toISOString(),
+      trained:      false,
+    };
+
+    document.getElementById('loading').classList.remove('show');
+    renderResult(result.score, result.kws, lv);
+
+    btn.disabled = false;
+    btn.innerHTML = '🔍 &nbsp; 지금 바로 검사하기';
+    busy = false;
+  }, 600);
+}
+
+/* ══════════════════════════════════════════════════════
+   결과 렌더링
+══════════════════════════════════════════════════════ */
+function renderResult(score, kws, lv){
+  const card = document.getElementById('result-card');
+  card.className = 'result-card show ' + lv.cls;
+
+  document.getElementById('r-emoji').textContent   = lv.emoji;
+  document.getElementById('r-level').textContent   = lv.label;
+  document.getElementById('r-summary').textContent = lv.summary;
+  document.getElementById('r-score').textContent   = score + ' / 100';
+
+  document.getElementById('r-bar').style.width = '0%';
+  setTimeout(()=>{ document.getElementById('r-bar').style.width = score + '%'; }, 60);
+
+  document.getElementById('r-actions').innerHTML = getActions(score)
+    .map((a,i)=>`<div class="act-item"><div class="act-num">${i+1}</div><div>${a}</div></div>`).join('');
+  document.getElementById('r-kws').innerHTML = kws.slice(0,8)
+    .map(k=>`<span class="kw">"${k}"</span>`).join('');
+
+  document.getElementById('fb-card').classList.add('show');
+  document.getElementById('fb-fraud').classList.remove('sel');
+  document.getElementById('fb-safe').classList.remove('sel');
+  document.getElementById('fb-fraud').disabled = false;
+  document.getElementById('fb-safe').disabled  = false;
+  document.getElementById('fb-done').classList.remove('show');
+
+  if(score >= 50) document.getElementById('report-wrap').classList.add('show');
+  document.getElementById('reset-btn').classList.add('show');
+
+  card.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ══════════════════════════════════════════════════════
+   피드백 → localStorage 저장
+   (서버 없이 브라우저에 누적, 다운로드 버튼으로 JSON 추출)
+══════════════════════════════════════════════════════ */
+function sendFeedback(label){
+  if(feedbackSent || !ctx.text) return;
+  feedbackSent = true;
+
+  document.getElementById('fb-fraud').classList.toggle('sel', label==='fraud');
+  document.getElementById('fb-safe').classList.toggle('sel',  label==='safe');
+  document.getElementById('fb-fraud').disabled = true;
+  document.getElementById('fb-safe').disabled  = true;
+
+  const list = loadFeedbacks();
+  list.push({ ...ctx, label });
+  saveFeedbacks(list);
+  refreshCount();
+
+  const done = document.getElementById('fb-done');
+  done.textContent = label==='fraud'
+    ? '🚨 사기로 기록됐어요. 감사합니다!'
+    : '✅ 정상으로 기록됐어요. 감사합니다!';
+  done.classList.add('show');
+  showToast(label==='fraud' ? '사기 피드백 저장 완료' : '정상 피드백 저장 완료');
+}
+
+/* ══════════════════════════════════════════════════════
+   유틸
+══════════════════════════════════════════════════════ */
+function hideAll(){
+  document.getElementById('result-card').className = 'result-card';
+  document.getElementById('fb-card').classList.remove('show');
+  document.getElementById('report-wrap').classList.remove('show');
+  document.getElementById('reset-btn').classList.remove('show');
+  document.getElementById('loading').classList.remove('show');
+  feedbackSent = false;
+}
+function doReset(){
+  document.getElementById('msg-input').value = '';
+  hideAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+let _callNum = '';
+function openModal(num,name){
+  _callNum = num;
+  document.getElementById('m-icon').textContent     = num==='112'?'👮':'🏛️';
+  document.getElementById('m-title').textContent    = name+' '+num;
+  document.getElementById('m-desc').textContent     = name+' '+num+'에 연결합니다.\n피해 상황을 상담원에게 설명해 주세요.';
+  document.getElementById('m-call-btn').style.background = num==='112'?'#DC2626':'#2563EB';
+  document.getElementById('call-modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('call-modal').classList.remove('open'); }
+function doCall(){ closeModal(); window.location.href='tel:'+_callNum; }
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+</script>
+</body>
+</html>
