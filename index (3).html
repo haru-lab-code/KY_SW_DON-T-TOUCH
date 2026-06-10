@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>제보하기 — 사기 수법 신고</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #eeeeee;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-tertiary: #999999;
+    --border-light: rgba(0,0,0,0.1);
+    --border-medium: rgba(0,0,0,0.18);
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #1c1c1e;
+      --bg-secondary: #2c2c2e;
+      --bg-tertiary: #141414;
+      --text-primary: #f2f2f7;
+      --text-secondary: #aeaeb2;
+      --text-tertiary: #636366;
+      --border-light: rgba(255,255,255,0.08);
+      --border-medium: rgba(255,255,255,0.15);
+    }
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-tertiary);
+    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    background: var(--bg-tertiary);
+    min-height: 100vh;
+    padding-bottom: 90px;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg-primary);
+    border-bottom: 0.5px solid var(--border-light);
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topbar-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  /* ── Section cards ── */
+  .section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-xl);
+    margin: 12px;
+    padding: 18px 16px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  /* ── Field labels ── */
+  .field-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 16px;
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
+  }
+
+  /* ── Custom select ── */
+  .custom-select-wrap {
+    position: relative;
+  }
+  .custom-select-btn {
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    padding: 12px 40px 12px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: border-color .15s;
+  }
+  .custom-select-btn.placeholder { color: var(--text-tertiary); }
+  .custom-select-btn:focus { outline: none; border-color: #378ADD; }
+  .custom-select-btn::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--text-tertiary);
+    pointer-events: none;
+  }
+
+  /* ── Dropdown sheet ── */
+  .sheet-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 100;
+    align-items: flex-end;
+  }
+  .sheet-overlay.open { display: flex; }
+  .sheet {
+    background: var(--bg-primary);
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    border-radius: 20px 20px 0 0;
+    padding: 8px 0 40px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideUp .22s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+  .sheet-handle {
+    width: 36px; height: 4px;
+    background: var(--border-medium);
+    border-radius: 2px;
+    margin: 10px auto 14px;
+  }
+  .sheet-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    font-size: 15px;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-bottom: 0.5px solid var(--border-light);
+  }
+  .sheet-option:last-child { border-bottom: none; }
+  .sheet-option:active { background: var(--bg-secondary); }
+  .sheet-option-left { display: flex; align-items: center; gap: 10px; }
+  .option-emoji { font-size: 20px; width: 28px; text-align: center; }
+  .radio-circle {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border-medium);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .radio-circle.selected {
+    border-color: #f5c100;
+    background: #f5c100;
+  }
+  .radio-circle.selected::after {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #1a1a1a;
+  }
+
+  /* ── Channel chips ── */
+  .channel-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .chip {
+    border: 0.5px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    text-align: center;
+    transition: all .15s;
+    user-select: none;
+  }
+  .chip.active {
+    border-color: #378ADD;
+    background: #e6f1fb;
+    color: #0c447c;
+    font-weight: 600;
+  }
+  @media (prefers-color-scheme: dark) {
+    .chip.active { background: #0c2a45; color: #85b7eb; border-color: #378ADD; }
+  }
+
+  /* ── Textarea ── */
+  textarea {
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text-primary);
+    line-height: 1.65;
+    resize: vertical;
+    min-height: 108px;
+  }
+  textarea::placeholder { color: var(--text-tertiary); }
+  textarea:focus { outline: none; border-color: #378ADD; }
+
+  /* ── Submit button ── */
+  .submit-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    letter-spacing: -0.3px;
+    transition: opacity .15s;
+  }
+  .submit-btn:active { opacity: .8; }
+  @media (prefers-color-scheme: dark) {
+    .submit-btn { background: #f2f2f7; color: #1a1a1a; }
+  }
+
+  .anon-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  /* ── Agency cards ── */
+  .agency-card {
+    border: 0.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 13px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 9px;
+    cursor: pointer;
+    background: var(--bg-secondary);
+    text-decoration: none;
+    transition: opacity .15s;
+  }
+  .agency-card:active { opacity: .7; }
+  .agency-card:last-child { margin-bottom: 0; }
+  .agency-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .agency-body { flex: 1; }
+  .agency-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .agency-desc { font-size: 12px; color: var(--text-secondary); }
+  .agency-situation {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    margin-top: 5px;
+  }
+  .chevron {
+    font-size: 18px;
+    color: var(--text-tertiary);
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  /* ── Community posts ── */
+  .count-badge {
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 2px 9px;
+    border-radius: 10px;
+    margin-left: 6px;
+  }
+  .filter-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    margin-bottom: 14px;
+  }
+  .filter-scroll::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    flex-shrink: 0;
+    border: 0.5px solid var(--border-medium);
+    border-radius: 20px;
+    padding: 5px 13px;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+  }
+  .filter-chip.active {
+    background: #1a1a1a;
+    color: #fff;
+    border-color: #1a1a1a;
+  }
+  @media (prefers-color-scheme: dark) {
+    .filter-chip.active { background: #f2f2f7; color: #1a1a1a; border-color: #f2f2f7; }
+  }
+
+  .post-card {
+    border: 0.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 13px;
+    margin-bottom: 9px;
+    background: var(--bg-secondary);
+  }
+  .post-card:last-child { margin-bottom: 0; }
+  .post-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 9px;
+  }
+  .avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .post-meta { flex: 1; }
+  .post-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .post-date { font-size: 11px; color: var(--text-tertiary); }
+  .post-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .post-body {
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.68;
+    margin-bottom: 11px;
+  }
+  .post-actions { display: flex; align-items: center; gap: 8px; }
+  .helpful-btn {
+    border: 0.5px solid var(--border-medium);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text-secondary);
+    background: var(--bg-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all .15s;
+  }
+  .helpful-btn.active {
+    background: #eaf3de;
+    border-color: #3b6d11;
+    color: #27500a;
+    font-weight: 600;
+  }
+  @media (prefers-color-scheme: dark) {
+    .helpful-btn.active { background: #173404; color: #c0dd97; border-color: #3b6d11; }
+  }
+  .report-flag-btn {
+    border: 0.5px solid var(--border-light);
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    color: var(--text-tertiary);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: auto;
+    transition: all .15s;
+  }
+  .report-flag-btn:hover { color: #c0392b; border-color: #c0392b; }
+  .report-flag-btn.reported { color: var(--text-tertiary); cursor: default; }
+
+  /* ── 내 제보 삭제 버튼 ── */
+  .delete-my-btn {
+    border: 0.5px solid #f0baba;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: inherit;
+    color: #c0392b;
+    background: #fdf0f0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    transition: all .15s;
+  }
+  .delete-my-btn:hover { background: #fad8d8; border-color: #c0392b; }
+  @media (prefers-color-scheme: dark) {
+    .delete-my-btn { background: #3a1010; border-color: #8b2020; color: #f08080; }
+    .delete-my-btn:hover { background: #4e1515; }
+  }
+
+  /* ── 내 제보 뱃지 ── */
+  .my-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    background: #e6f1fb;
+    color: #185fa5;
+    padding: 1px 7px;
+    border-radius: 10px;
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+  @media (prefers-color-scheme: dark) {
+    .my-badge { background: #0c2a45; color: #85b7eb; }
+  }
+
+  /* ── Bottom nav ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--bg-primary);
+    border-top: 0.5px solid var(--border-light);
+    display: flex;
+    z-index: 20;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 0 12px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    gap: 4px;
+    transition: color .15s;
+  }
+  .nav-item.active { color: #e84040; }
+  .nav-icon { font-size: 22px; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 96px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    color: #fff;
+    padding: 11px 22px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-family: inherit;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 200;
+    max-width: calc(100vw - 40px);
+    text-align: center;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── Confirm Dialog ── */
+  .dialog-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .dialog-overlay.open { display: flex; }
+  .dialog {
+    background: var(--bg-primary);
+    border-radius: 18px;
+    padding: 28px 22px 20px;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+    animation: popIn .2s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(.88); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .dialog-icon { font-size: 36px; margin-bottom: 10px; }
+  .dialog-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+  .dialog-body { font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 22px; }
+  .dialog-actions { display: flex; gap: 10px; }
+  .dialog-btn {
+    flex: 1;
+    padding: 13px;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    transition: opacity .15s;
+  }
+  .dialog-btn:active { opacity: .75; }
+  .dialog-btn.cancel {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 0.5px solid var(--border-medium);
+  }
+  .dialog-btn.confirm {
+    background: #c0392b;
+    color: #fff;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <span style="font-size:20px">📢</span>
+    <span class="topbar-title">제보하기</span>
+  </div>
+
+  <!-- ── 사기 수법 제보 폼 ── -->
+  <div class="section">
+    <div class="section-title">🔊 사기 수법 제보하기</div>
+    <div class="section-sub">내가 경험한 사기 시도를 공유해서 다른 사람을 지켜주세요</div>
+
+    <div class="field-label">사기 유형</div>
+    <div class="custom-select-wrap">
+      <button class="custom-select-btn placeholder" id="fraud-type-btn" onclick="openSheet('fraud-type')">
+        선택해주세요
+      </button>
+    </div>
+
+    <div class="field-label">어떤 채널로 접근했나요?</div>
+    <div class="channel-grid" id="channel-grid">
+      <div class="chip" onclick="toggleChip(this)">📞 전화</div>
+      <div class="chip" onclick="toggleChip(this)">💬 문자(SMS)</div>
+      <div class="chip" onclick="toggleChip(this)">🟡 카카오톡</div>
+      <div class="chip" onclick="toggleChip(this)">📧 이메일</div>
+      <div class="chip" onclick="toggleChip(this)">📱 소셜미디어</div>
+      <div class="chip" onclick="toggleChip(this)">⋯ 기타</div>
+    </div>
+
+    <div class="field-label">어떤 방식으로 접근했나요?</div>
+    <textarea id="detail" placeholder="예) 금감원 직원이라며 전화가 왔고 OTP를 알려달라고 했어요. 전화 끊고 신고했습니다.&#10;&#10;(개인정보는 절대 입력하지 마세요)"></textarea>
+
+    <div class="field-label">피해 여부</div>
+    <div class="custom-select-wrap">
+      <button class="custom-select-btn placeholder" id="damage-btn" onclick="openSheet('damage')">
+        선택해주세요
+      </button>
+    </div>
+
+    <button class="submit-btn" onclick="submitReport()">✅ 익명으로 제보하기</button>
+    <div class="anon-note">🔒 제보 내용은 완전 익명으로 처리됩니다</div>
+  </div>
+
+  <!-- ── 피해 신고 바로가기 ── -->
+  <div class="section">
+    <div class="section-title">📞 피해 신고 바로가기</div>
+
+    <a class="agency-card" href="tel:112">
+      <div class="agency-icon" style="background:#e6f1fb">👮</div>
+      <div class="agency-body">
+        <div class="agency-name" style="color:#185fa5">경찰청 112</div>
+        <div class="agency-desc">보이스피싱 피해 신고</div>
+        <span class="agency-situation" style="background:#e6f1fb;color:#0c447c">지금 당장 피해가 발생 중이라면</span>
+      </div>
+      <span class="chevron">›</span>
+    </a>
+
+    <a class="agency-card" href="tel:1332">
+      <div class="agency-icon" style="background:#e1f5ee">🏛️</div>
+      <div class="agency-body">
+        <div class="agency-name" style="color:#0f6e56">금융감독원 1332</div>
+        <div class="agency-desc">금융사기 신고·상담</div>
+        <span class="agency-situation" style="background:#e1f5ee;color:#085041">계좌·카드·대출 관련 금융사기라면</span>
+      </div>
+      <span class="chevron">›</span>
+    </a>
+
+    <a class="agency-card" href="tel:118">
+      <div class="agency-icon" style="background:#eaf3de">💻</div>
+      <div class="agency-body">
+        <div class="agency-name" style="color:#3b6d11">인터넷진흥원 118</div>
+        <div class="agency-desc">스미싱·피싱 신고</div>
+        <span class="agency-situation" style="background:#eaf3de;color:#27500a">문자·링크·앱 설치 유도를 받았다면</span>
+      </div>
+      <span class="chevron">›</span>
+    </a>
+  </div>
+
+  <!-- ── 커뮤니티 제보 ── -->
+  <div class="section">
+    <div style="display:flex;align-items:center;margin-bottom:12px">
+      <div class="section-title" style="margin-bottom:0">💬 커뮤니티 제보</div>
+      <span class="count-badge" id="post-count">5건</span>
+    </div>
+
+    <div class="filter-scroll" id="filter-row">
+      <button class="filter-chip active" onclick="filterPosts(this,'전체')">전체</button>
+      <button class="filter-chip" onclick="filterPosts(this,'금융·계좌')">금융·계좌</button>
+      <button class="filter-chip" onclick="filterPosts(this,'앱 설치')">앱 설치</button>
+      <button class="filter-chip" onclick="filterPosts(this,'개인정보')">개인정보</button>
+      <button class="filter-chip" onclick="filterPosts(this,'투자')">투자</button>
+      <button class="filter-chip" onclick="filterPosts(this,'기타')">기타</button>
+    </div>
+
+    <div id="posts-container"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ── Bottom Nav ── -->
+<div class="bottom-nav">
+  <div class="nav-item" onclick="alert('검사하기 탭')">
+    <span class="nav-icon">🔍</span>검사하기
+  </div>
+  <div class="nav-item" onclick="alert('사기 수법 탭')">
+    <span class="nav-icon">📋</span>사기 수법
+  </div>
+  <div class="nav-item active">
+    <span class="nav-icon">📢</span>제보하기
+  </div>
+</div>
+
+<!-- ── Sheet: 사기 유형 ── -->
+<div class="sheet-overlay" id="sheet-fraud-type" onclick="closeSheetOutside(event,'sheet-fraud-type')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','')">
+      <div class="sheet-option-left"><span>선택해주세요</span></div>
+      <div class="radio-circle selected" id="radio-fraud-type-"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','💳 금융·계좌 사기')">
+      <div class="sheet-option-left"><span class="option-emoji">💳</span><span>금융·계좌 사기</span></div>
+      <div class="radio-circle" id="radio-fraud-type-1"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','📦 택배 사칭')">
+      <div class="sheet-option-left"><span class="option-emoji">📦</span><span>택배 사칭</span></div>
+      <div class="radio-circle" id="radio-fraud-type-2"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','📱 앱 설치 유도')">
+      <div class="sheet-option-left"><span class="option-emoji">📱</span><span>앱 설치 유도</span></div>
+      <div class="radio-circle" id="radio-fraud-type-3"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','👥 가족·지인 사칭')">
+      <div class="sheet-option-left"><span class="option-emoji">👥</span><span>가족·지인 사칭</span></div>
+      <div class="radio-circle" id="radio-fraud-type-4"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','📈 투자 리딩방')">
+      <div class="sheet-option-left"><span class="option-emoji">📈</span><span>투자 리딩방</span></div>
+      <div class="radio-circle" id="radio-fraud-type-5"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','🏛️ 정부기관 사칭')">
+      <div class="sheet-option-left"><span class="option-emoji">🏛️</span><span>정부기관 사칭</span></div>
+      <div class="radio-circle" id="radio-fraud-type-6"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','🎁 당첨·경품 사기')">
+      <div class="sheet-option-left"><span class="option-emoji">🎁</span><span>당첨·경품 사기</span></div>
+      <div class="radio-circle" id="radio-fraud-type-7"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('fraud-type','기타')">
+      <div class="sheet-option-left"><span>기타</span></div>
+      <div class="radio-circle" id="radio-fraud-type-8"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Sheet: 피해 여부 ── -->
+<div class="sheet-overlay" id="sheet-damage" onclick="closeSheetOutside(event,'sheet-damage')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-option" onclick="selectOption('damage','')">
+      <div class="sheet-option-left"><span>선택해주세요</span></div>
+      <div class="radio-circle selected" id="radio-damage-"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('damage','피해 없음 (예방 성공)')">
+      <div class="sheet-option-left"><span>피해 없음 (예방 성공)</span></div>
+      <div class="radio-circle" id="radio-damage-1"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('damage','소액 피해 (10만원 미만)')">
+      <div class="sheet-option-left"><span>소액 피해 (10만원 미만)</span></div>
+      <div class="radio-circle" id="radio-damage-2"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('damage','중간 피해 (10~100만원)')">
+      <div class="sheet-option-left"><span>중간 피해 (10~100만원)</span></div>
+      <div class="radio-circle" id="radio-damage-3"></div>
+    </div>
+    <div class="sheet-option" onclick="selectOption('damage','큰 피해 (100만원 이상)')">
+      <div class="sheet-option-left"><span>큰 피해 (100만원 이상)</span></div>
+      <div class="radio-circle" id="radio-damage-4"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 삭제 확인 다이얼로그 ── -->
+<div class="dialog-overlay" id="delete-dialog">
+  <div class="dialog">
+    <div class="dialog-icon">🗑️</div>
+    <div class="dialog-title">제보 삭제</div>
+    <div class="dialog-body">내가 올린 제보를 삭제할까요?<br>삭제 후에는 복구할 수 없습니다.</div>
+    <div class="dialog-actions">
+      <button class="dialog-btn cancel" onclick="cancelDelete()">취소</button>
+      <button class="dialog-btn confirm" onclick="confirmDelete()">삭제하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 신고 확인 다이얼로그 ── -->
+<div class="dialog-overlay" id="report-dialog">
+  <div class="dialog">
+    <div class="dialog-icon">🚩</div>
+    <div class="dialog-title">부정확한 정보 신고</div>
+    <div class="dialog-body">이 제보가 부정확하거나 허위 정보를 포함하고 있나요?<br>신고 후에는 취소할 수 없습니다.</div>
+    <div class="dialog-actions">
+      <button class="dialog-btn cancel" onclick="cancelReport()">취소</button>
+      <button class="dialog-btn confirm" onclick="confirmReport()">신고하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════
+   상태 (State)
+════════════════════════════════ */
+const selections = { 'fraud-type': '', 'damage': '' };
+let pendingReportId = null;
+let pendingDeleteId = null;
+let myPostIds = new Set(); /* 내가 등록한 제보 ID 목록 */
+let nextId = 6;
+let activeFilter = '전체';
+
+/* 태그 메타 (색상) */
+const TAG_META = {
+  '금융·계좌': { tagBg:'#FAECE7', tagColor:'#993C1D' },
+  '택배 사칭':  { tagBg:'#FFF3E0', tagColor:'#8B4500' },
+  '앱 설치':   { tagBg:'#E1F5EE', tagColor:'#0F6E56' },
+  '가족·지인': { tagBg:'#EEE8FB', tagColor:'#4A2A9A' },
+  '투자':      { tagBg:'#FAEEDA', tagColor:'#854F0B' },
+  '정부기관':  { tagBg:'#E6F0FF', tagColor:'#1A3A8F' },
+  '당첨·경품': { tagBg:'#FCE8F0', tagColor:'#8F1A4A' },
+  '개인정보':  { tagBg:'#FCEBEB', tagColor:'#A32D2D' },
+  '기타':      { tagBg:'#F1EFE8', tagColor:'#444441' },
+};
+
+/* 사기유형 선택값 → 태그 키 매핑 */
+const TYPE_TO_TAG = {
+  '💳 금융·계좌 사기': '금융·계좌',
+  '📦 택배 사칭':      '택배 사칭',
+  '📱 앱 설치 유도':   '앱 설치',
+  '👥 가족·지인 사칭': '가족·지인',
+  '📈 투자 리딩방':    '투자',
+  '🏛️ 정부기관 사칭':  '정부기관',
+  '🎁 당첨·경품 사기': '당첨·경품',
+  '기타':              '기타',
+};
+
+/* 아바타 색상 풀 */
+const AVATAR_STYLES = [
+  { color:'#185FA5', bg:'#E6F1FB' },
+  { color:'#993556', bg:'#FBEAF0' },
+  { color:'#3B6D11', bg:'#EAF3DE' },
+  { color:'#534AB7', bg:'#EEEDFE' },
+  { color:'#5F5E5A', bg:'#F1EFE8' },
+  { color:'#0F6E56', bg:'#E1F5EE' },
+  { color:'#854F0B', bg:'#FAEEDA' },
+];
+
+/* 초기 게시물 */
+const posts = [
+  { id:1, initial:'K', color:'#185FA5', bg:'#E6F1FB', tag:'금융·계좌', tagBg:'#FAECE7', tagColor:'#993C1D', date:'2026.03.28',
+    body:'검찰청 수사관이라며 전화가 왔는데, 제 계좌가 범죄에 연루됐다며 안전계좌로 돈을 이체하라고 했어요. 검찰은 절대 전화로 계좌이체를 요구하지 않아요. 바로 끊고 검찰청 공식번호로 확인했어요.',
+    helpful:214, userHelped:false, userReported:false, reportCount:0 },
+  { id:2, initial:'L', color:'#993556', bg:'#FBEAF0', tag:'앱 설치', tagBg:'#E1F5EE', tagColor:'#0F6E56', date:'2026.03.27',
+    body:'국민건강보험공단이라며 문자가 왔고, 환급금 신청을 위해 앱을 설치하라는 링크가 있었어요. URL이 nhis-refund.top이었는데 공식 도메인(nhis.or.kr)과 전혀 달랐어요. APK 설치 유도는 100% 사기입니다!',
+    helpful:178, userHelped:false, userReported:false, reportCount:0 },
+  { id:3, initial:'M', color:'#3B6D11', bg:'#EAF3DE', tag:'투자', tagBg:'#FAEEDA', tagColor:'#854F0B', date:'2026.03.25',
+    body:'카카오톡 오픈채팅에서 주식 리딩방이라며 초대받았어요. 처음엔 소액으로 수익이 나더니 나중엔 큰 금액을 요구했어요. 결국 인출도 안 되고 먹튀당했습니다.',
+    helpful:143, userHelped:false, userReported:false, reportCount:0 },
+  { id:4, initial:'P', color:'#534AB7', bg:'#EEEDFE', tag:'개인정보', tagBg:'#FCEBEB', tagColor:'#A32D2D', date:'2026.03.22',
+    body:'금감원 직원이라며 전화가 왔고 OTP를 알려달라고 했어요. OTP는 절대 타인에게 알려주면 안 됩니다. 바로 끊고 신고했어요.',
+    helpful:97, userHelped:false, userReported:false, reportCount:0 },
+  { id:5, initial:'J', color:'#5F5E5A', bg:'#F1EFE8', tag:'기타', tagBg:'#F1EFE8', tagColor:'#444441', date:'2026.03.20',
+    body:'해외직구 사이트인 척하며 물건을 받으려면 관세 납부가 필요하다는 문자가 왔어요. 링크 클릭하면 카드정보 입력을 요구합니다. 절대 입력하지 마세요.',
+    helpful:62, userHelped:false, userReported:false, reportCount:0 }
+];
+
+/* ════════════════════════════════
+   바텀시트 열기/닫기
+════════════════════════════════ */
+function openSheet(key) {
+  document.getElementById('sheet-' + key).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSheet(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+function closeSheetOutside(e, id) {
+  if (e.target === document.getElementById(id)) closeSheet(id);
+}
+
+/* ════════════════════════════════
+   라디오 선택
+════════════════════════════════ */
+const radioMaps = {
+  'fraud-type': { '':'', '💳 금융·계좌 사기':'1','📦 택배 사칭':'2','📱 앱 설치 유도':'3','👥 가족·지인 사칭':'4','📈 투자 리딩방':'5','🏛️ 정부기관 사칭':'6','🎁 당첨·경품 사기':'7','기타':'8' },
+  'damage':     { '':'', '피해 없음 (예방 성공)':'1','소액 피해 (10만원 미만)':'2','중간 피해 (10~100만원)':'3','큰 피해 (100만원 이상)':'4' },
+};
+function findRadioIdx(key, val) { return radioMaps[key]?.[val] ?? ''; }
+
+function selectOption(key, val) {
+  const prev = selections[key];
+  selections[key] = val;
+
+  const prevEl = document.getElementById('radio-' + key + '-' + (prev === '' ? '' : findRadioIdx(key, prev)));
+  if (prevEl) prevEl.classList.remove('selected');
+
+  const newEl = document.getElementById('radio-' + key + '-' + (val === '' ? '' : findRadioIdx(key, val)));
+  if (newEl) newEl.classList.add('selected');
+
+  const btn = document.getElementById(key + '-btn');
+  if (btn) {
+    if (val === '') { btn.textContent = '선택해주세요'; btn.classList.add('placeholder'); }
+    else            { btn.textContent = val;            btn.classList.remove('placeholder'); }
+  }
+  closeSheet('sheet-' + key);
+}
+
+/* ════════════════════════════════
+   채널 칩
+════════════════════════════════ */
+function toggleChip(el) { el.classList.toggle('active'); }
+
+/* ════════════════════════════════
+   필터
+════════════════════════════════ */
+function filterPosts(el, tag) {
+  activeFilter = tag;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderPosts();
+}
+
+/* ════════════════════════════════
+   렌더링
+════════════════════════════════ */
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function renderPosts() {
+  /* 삭제되지 않은 글만 필터링 */
+  const visible = posts.filter(p => !p.removed);
+  const filtered = activeFilter === '전체' ? visible : visible.filter(p => p.tag === activeFilter);
+  document.getElementById('post-count').textContent = filtered.length + '건';
+
+  if (filtered.length === 0) {
+    document.getElementById('posts-container').innerHTML =
+      '<div style="text-align:center;padding:32px 0;color:var(--text-tertiary);font-size:13px">해당 유형의 제보가 없습니다</div>';
+    return;
+  }
+
+  document.getElementById('posts-container').innerHTML = filtered.map(p => `
+    <div class="post-card" id="post-${p.id}">
+      <div class="post-header">
+        <div class="avatar" style="background:${p.bg};color:${p.color}">${p.initial}</div>
+        <div class="post-meta">
+          <div class="post-name">익명 제보자 ${myPostIds.has(p.id) ? '<span class="my-badge">내 제보</span>' : ''}</div>
+          <div class="post-date">${p.date}</div>
+        </div>
+        <span class="post-tag" style="background:${p.tagBg};color:${p.tagColor}">${p.tag}</span>
+      </div>
+      <div class="post-body">${p.body}</div>
+      <div class="post-actions">
+        <button class="helpful-btn${p.userHelped?' active':''}" onclick="toggleHelp(${p.id})">
+          👍 도움됐어요 ${p.helpful}
+        </button>
+        ${myPostIds.has(p.id)
+          ? `<button class="delete-my-btn" onclick="askDeletePost(${p.id})">🗑️ 삭제</button>`
+          : `<button class="report-flag-btn${p.userReported?' reported':''}"
+              onclick="${p.userReported ? '' : 'reportPost('+p.id+')'}"
+              ${p.userReported ? 'disabled style="opacity:.5;cursor:default"' : ''}>
+              🚩 ${p.userReported ? '신고됨 ('+p.reportCount+'/10)' : '부정확한 정보 신고'}
+            </button>`
+        }
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ════════════════════════════════
+   도움됐어요
+════════════════════════════════ */
+function toggleHelp(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p) return;
+  p.userHelped ? (p.helpful--, p.userHelped=false) : (p.helpful++, p.userHelped=true);
+  renderPosts();
+}
+
+/* ════════════════════════════════
+   내 제보 삭제
+════════════════════════════════ */
+function askDeletePost(id) {
+  pendingDeleteId = id;
+  document.getElementById('delete-dialog').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function cancelDelete() {
+  pendingDeleteId = null;
+  document.getElementById('delete-dialog').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function confirmDelete() {
+  if (pendingDeleteId === null) return;
+  const p = posts.find(x => x.id === pendingDeleteId);
+  if (p) { p.removed = true; myPostIds.delete(pendingDeleteId); }
+  pendingDeleteId = null;
+  document.getElementById('delete-dialog').classList.remove('open');
+  document.body.style.overflow = '';
+  renderPosts();
+  showToast('🗑️ 제보가 삭제됐습니다.');
+}
+
+/* ════════════════════════════════
+   신고 (확인 다이얼로그)
+════════════════════════════════ */
+function reportPost(id) {
+  const p = posts.find(x => x.id === id);
+  if (!p || p.userReported) { showToast('이미 신고한 게시물입니다'); return; }
+  pendingReportId = id;
+  document.getElementById('report-dialog').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function cancelReport() {
+  pendingReportId = null;
+  document.getElementById('report-dialog').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function confirmReport() {
+  if (pendingReportId === null) return;
+  const p = posts.find(x => x.id === pendingReportId);
+  if (p) {
+    p.userReported = true;
+    p.reportCount = (p.reportCount || 0) + 1;
+
+    /* 신고 10회 이상 → 게시물 삭제 */
+    if (p.reportCount >= 10) {
+      p.removed = true;
+      pendingReportId = null;
+      document.getElementById('report-dialog').classList.remove('open');
+      document.body.style.overflow = '';
+      renderPosts();
+      showToast('🚫 신고가 누적되어 해당 게시물이 삭제됐습니다.');
+      return;
+    }
+    renderPosts();
+  }
+  pendingReportId = null;
+  document.getElementById('report-dialog').classList.remove('open');
+  document.body.style.overflow = '';
+  showToast('신고가 접수됐습니다. 검토 후 처리됩니다.');
+}
+
+/* ════════════════════════════════
+   제보 등록 ← 핵심 수정
+════════════════════════════════ */
+function submitReport() {
+  const type   = selections['fraud-type'];
+  const detail = document.getElementById('detail').value.trim();
+  const damage = selections['damage'];
+  const chips  = [...document.querySelectorAll('#channel-grid .chip.active')].map(c => c.textContent.trim());
+
+  if (!type)         { showToast('사기 유형을 선택해주세요');       return; }
+  if (!chips.length) { showToast('접근 채널을 하나 이상 선택해주세요'); return; }
+  if (!detail)       { showToast('사기 방식을 간략히 적어주세요');   return; }
+  if (!damage)       { showToast('피해 여부를 선택해주세요');        return; }
+
+  /* 태그 결정 */
+  const tag  = TYPE_TO_TAG[type] || '기타';
+  const meta = TAG_META[tag]     || TAG_META['기타'];
+
+  /* 아바타 랜덤 */
+  const av = AVATAR_STYLES[nextId % AVATAR_STYLES.length];
+
+  /* 알파벳 이니셜 랜덤 */
+  const initials = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const initial  = initials[Math.floor(Math.random() * initials.length)];
+
+  /* 본문 구성 */
+  const channelTxt = chips.join(', ');
+  const body = `[${channelTxt}] ${detail}  (피해 여부: ${damage})`;
+
+  const newId = nextId++;
+  /* posts 배열 앞에 추가 */
+  posts.unshift({
+    id: newId,
+    initial,
+    color: av.color,
+    bg:    av.bg,
+    tag,
+    tagBg:       meta.tagBg,
+    tagColor:    meta.tagColor,
+    date:        todayStr(),
+    body,
+    helpful:     0,
+    userHelped:  false,
+    userReported:false,
+    reportCount: 0,
+    removed:     false,
+  });
+  myPostIds.add(newId);
+
+  /* 현재 필터가 해당 태그와 맞지 않으면 전체로 이동 */
+  if (activeFilter !== '전체' && activeFilter !== tag) {
+    activeFilter = '전체';
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector('.filter-chip').classList.add('active');
+  }
+
+  renderPosts();
+  showToast('✅ 제보가 등록됐습니다. 감사합니다!');
+
+  /* 폼 초기화 */
+  selectOption('fraud-type','');
+  selectOption('damage','');
+  document.getElementById('detail').value = '';
+  document.querySelectorAll('#channel-grid .chip').forEach(c => c.classList.remove('active'));
+
+  /* 커뮤니티 섹션으로 스크롤 */
+  setTimeout(() => {
+    document.getElementById('posts-container').scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 300);
+}
+
+/* ════════════════════════════════
+   토스트
+════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── 초기화 ── */
+renderPosts();
+</script>
+</body>
+</html>
